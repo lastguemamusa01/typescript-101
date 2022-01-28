@@ -5,7 +5,7 @@ type Foot = number;
 type Pound = number;
 
 type Patient = {
-  name: string,
+  name: string;
   height: Foot;
   weight?: Pound;
 }

@@ -600,7 +600,7 @@ type Foot = number;
 type Pound = number;
 
 type Patient = {
-  name: string,
+  name: string;
   hiehgt: Foot;
   weight: Pound;
 }
@@ -661,6 +661,13 @@ JavaScript doesn’t offer any syntax for declaring class properties, but TypeSc
 
 ![image](https://user-images.githubusercontent.com/25869911/151487930-b9412d4c-b852-43bf-bcdf-c8468365305e.png)
 
+```ts
+class Person {
+  firstName: string;
+  lastNmae: string;
+  age: number;
+}
+```
 
 As you can see, there are no properties in the JavaScript version of the Person class. Also, since the Person class didn’t declare a constructor, we had to initialize its proper- ties after instantiation. A constructor is a special function that’s executed once when the instance of a class is created.
 Declaring a constructor with three arguments would allow you to instantiate the Person class and initialize its properties in one line. In TypeScript you can provide type annotations for a constructor’s arguments, but there’s more.
@@ -668,6 +675,11 @@ TypeScript offers the access level qualifiers public, private, and protected (co
 
 ![image](https://user-images.githubusercontent.com/25869911/151488277-a8b8b764-ff43-4d92-b50a-19a98ac7de56.png)
 
+```ts
+class PersonWithContructor {
+    constructor(public firstName: string, public lastName: string, public age: number) {};
+}
+```
 
 Now the code of the TypeScript class (on the left) is more concise, and the generated JavaScript code creates three properties in the constructor. Note line 6 in figure 2.3 on the left. We declared the constant without specifying its type, but we could rewrite this line explicitly specifying the type of p as follows:
 
@@ -713,6 +725,18 @@ TypeScript includes the keywords interface and implements to support inter- face
 
 Suppose you want to write a function that can save information about people in some storage. This function should take an object that represents a person, and you want to ensure that it has specific properties of specific types. You can declare a Person interface as follows.
 
-```ts
+Declaring a custom type using an interface
 
+```ts
+interface Person {
+  firstName: string;
+  lastNmae: string;
+  age: number;
+}
 ```
+
+ If you declare a custom type as class, you can use it as a value, meaning you can instantiate it using the new keyword
+
+ Also, if you use the class keyword in the TypeScript code, it’ll have the corre- sponding code in generated JavaScript (a function in ES5, and a class in ES6). If you use the interface keyword, there won’t be any corresponding code in JavaScript, 
+
+
