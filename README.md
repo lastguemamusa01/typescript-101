@@ -666,6 +666,9 @@ As you can see, there are no properties in the JavaScript version of the Person 
 Declaring a constructor with three arguments would allow you to instantiate the Person class and initialize its properties in one line. In TypeScript you can provide type annotations for a constructor’s arguments, but there’s more.
 TypeScript offers the access level qualifiers public, private, and protected (cov- ered in chapter 3), and if you use any of them with the constructor arguments, the Typescript compiler will generate the code for adding these arguments as properties in the generated JavaScript object.
 
+![image](https://user-images.githubusercontent.com/25869911/151488277-a8b8b764-ff43-4d92-b50a-19a98ac7de56.png)
+
+
 Now the code of the TypeScript class (on the left) is more concise, and the generated JavaScript code creates three properties in the constructor. Note line 6 in figure 2.3 on the left. We declared the constant without specifying its type, but we could rewrite this line explicitly specifying the type of p as follows:
 
 ```ts
