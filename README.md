@@ -739,4 +739,5 @@ interface Person {
 
  Also, if you use the class keyword in the TypeScript code, it’ll have the corre- sponding code in generated JavaScript (a function in ES5, and a class in ES6). If you use the interface keyword, there won’t be any corresponding code in JavaScript, 
 
+![image](https://user-images.githubusercontent.com/25869911/151490504-446c7184-9954-4a8c-86c8-6fcc3783c46a.png)
 
