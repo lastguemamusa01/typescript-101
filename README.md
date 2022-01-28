@@ -741,3 +741,28 @@ interface Person {
 
 ![image](https://user-images.githubusercontent.com/25869911/151490504-446c7184-9954-4a8c-86c8-6fcc3783c46a.png)
 
+here is no mention of the interface on the right side of figure 2.4, and the JavaScript is more concise, which is good for any deployable code. But during development, the compiler will check that the object given as an argument to the savePerson() func- tion includes all the properties declared in the Person interface.
+
+#### Which keyword to use: type, interface, or class?
+
+e’ve shown you that a custom type can be declared using the keywords type,
+class, or interface. Which of these keywords should you use for declaring a cus- tom type like Person?
+If the custom type doesn’t need to be used for instantiating objects at runtime, use interface or type; otherwise use class. In other words, use class for creating a custom type if it should be used to represent a value.
+
+```ts
+interface Person {
+  name: string;
+}
+
+function getP(p: Person){
+    if (p instanceof Person){ // compile error
+    }
+}
+```
+The type checker will complain that Person only refers to a type but is being used as a value here.
+If you are declaring a custom type just for the additional safety offered by TypeScript’s type checker, use type or interface. Neither interfaces nor types declared with the type keyword have representations in the emitted JavaScript code, which makes the runtime code smaller (bytewise). If you use classes for declaring types, they will have a footprint in the generated JavaScript.
+Defining a custom type with the type keyword offers the same features as inter- face plus some extras. For example, you can’t use types declared as interfaces in unions or intersections. Also, in chapter 5, you’ll learn about conditional types, which can’t be declared using interfaces.
+
+### Structural vs. nominal type systems
+
+
