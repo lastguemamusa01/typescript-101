@@ -47,9 +47,30 @@ class Person {
     age: number;
 }
 
+class PersonWithContructor {
+    constructor(public firstName: string, public lastName: string, public age: number) {};
+}
+
+class block {
+    readonly nonce: number;
+    readonly hash: string;
+
+    constructor (
+        readonly index:  number,
+        readonly previousHash: string,
+        readonly timestamp: number,
+        readonly data: string
+    ) {
+        this.nonce = nonce;
+        this.hash = hash;
+    }
+}
+
 const p = new Person();
 p.firstName = "min ku";
 p.lastName = "Smith"
 p.age = 25;
+
+const pImproved = new PersonWithContructor("aldo","sam",30);
 
 console.log(getFinalPrice(100,10)); 

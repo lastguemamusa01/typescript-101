@@ -674,3 +674,45 @@ Now the code of the TypeScript class (on the left) is more concise, and the gene
 ```ts
 const p: Person = new Person("John", "Smith", 25);
 ````
+
+This would be an unnecessary use of an explicit type annotation. Since you declare a constant and immediately initialize it with an object of a known type (Person),
+
+the TypeScript type checker can easily infer and assign the type to the constant p. The generated JavaScript code will look the same regardless of whether you specify the type of p or not.
+
+ we used the public access level with each constructor argu- ment in the TypeScript class, which simply means that the generated corre- sponding properties can be accessed from any code located both inside and outside of the class.
+
+ When you declare properties of a class, you can also mark them as readonly. Such properties can be initialized either at the declaration point or in the class constructor, and their values can’t be changed afterwards. The readonly qualifier is similar to the const keyword, but the latter can’t be used with class properties.
+
+
+```ts
+class block {
+  readonly nonce: number;
+  readonly hash: string;
+
+  constructor (
+    readonly index:  number,
+    readonly previousHash: string,
+    readonly timestamp: number,
+    readonly data: string
+  ) {
+    this.nonce = nonce;
+    this.hash = hash;
+  }
+}
+```
+
+The Block class includes six readonly properties. Note that we don’t need to explic- itly declare class properties for constructor arguments that have readonly, private, protected, or public qualifiers as we would in other object-oriented languages
+
+### Using interfaces as custom types
+
+Many object-oriented languages include a syntax construct called interface, which is used to enforce the implementation of specified properties or methods on an object.
+
+JavaScript doesn’t support interfaces, but TypeScript does. In this section, we’ll show you how to use interfaces to declare custom types
+
+TypeScript includes the keywords interface and implements to support inter- faces, but interfaces aren’t compiled into JavaScript code. They just help you to avoid using wrong types during development. Let’s get familiar with using the interface keyword to declare a custom type.
+
+Suppose you want to write a function that can save information about people in some storage. This function should take an object that represents a person, and you want to ensure that it has specific properties of specific types. You can declare a Person interface as follows.
+
+```ts
+
+```
