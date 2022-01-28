@@ -204,3 +204,469 @@ On real-world projects, good context-sensitive help and support for refactoring 
 
 VS Code supports two modes for TypeScript code: file scope and explicit project. The file scope is pretty limited, as it doesn’t allow a script in a file to use variables declared in another. The explicit project mode requires you to have a tsconfig.json file in the project directory.
 
+If you’d like to be able to open VS Code from the command prompt, its executable will have to be added to the PATH environment variable on your computer. In Win- dows, the setup process should do it automatically. In macOS, start VS Code, select the View > Command Palette menu option, type shell command, and pick this option: Shell Command: Install ‘code’ Command in PATH. Then restart your terminal win- dow and enter code . from any directory. 
+
+### extensions and features for vs code : 
+
+* ESLint—Integrates the JavaScript linter and checks your code for readability and maintainability
+* Prettier—Enforces a consistent style by parsing your code and reformatting it with its own rules
+* Path Intellisense—Autocompletes file paths
+
+In addition to syntax highlighting, TypeScript and JavaScript also provide semantic highlighting.
+
+Syntax highlighting colors the text based on lexical rules. Semantic highlighting enriches the syntax coloring based on resolved symbol information from the language service.
+
+IntelliSense shows you intelligent code completion, hover info, and signature information so that you can write code more quickly and correctly.
+
+VS Code includes basic TypeScript snippets that are suggested as you type
+
+VS Code's TypeScript IntelliSense understands many standard JSDoc annotations, and uses them to show typing information and documentation in suggestions, hover info, and signature help.
+
+Hover over a TypeScript symbol to quickly see its type information and relevant documentation:
+
+As you write a TypeScript function call, VS Code shows information about the function signature and highlights the parameter that you are currently completing:
+
+Automatic imports speed up coding by helping you find available symbols and automatically adding imports for them.
+
+VS Code includes a TypeScript formatter that providers basic code formatting with reasonable defaults.
+Use the typescript.format.* settings to configure the built-in formatter, such as making braces appear on their own line
+
+VS Code's TypeScript features also work with JSX. To use JSX in your TypeScript, use the *.tsx file extension instead of the normal *.ts
+
+Press F2 to rename the symbol under the cursor across your TypeScript project
+
+VS Code includes some handy refactorings for TypeScript such as Extract function and Extract constant. Just select the source code you'd like to extract and then click on the lightbulb in the gutter or press (⌘.) to see available refactorings.
+
+Quick Fixes are suggested edits that address simple coding errors. Example Quick Fixes include:
+
+* Adding a missing this to a member access.
+* Fixing a misspelled property name.
+* Removing unreachable code or unused imports
+* Declaring
+
+Unused TypeScript code, such as the else block of an if statement that is always true or an unreferenced import, is faded out in the editor:
+
+The Organize Imports source code action sorts the imports in a TypeScript file and removes unused imports:
+
+The editor.codeActionsOnSave setting lets you configure a set of Code Actions that are run when a file is saved. For example, you can enable organize imports on save by setting:
+
+You can also set editor.codeActionsOnSave to an array of Code Actions to execute in order.
+
+Here are some source actions:
+
+* "organizeImports" - Enables organize imports on save.
+*  "fixAll" - Auto Fix on Save computes all possible fixes in one round (for all providers including ESLint).
+*  "fixAll.eslint" - Auto Fix only for ESLint.
+*  "addMissingImports" - Adds all missing imports on save.
+
+VS Code automatically suggests some common code simplifications such as converting a chain of .then calls on a promise to use async and await
+
+Inlay hints add additional inline information to source code to help you understand what the code does.
+
+The TypeScript references CodeLens displays an inline count of reference for classes, interfaces, methods, properties, and exported objects:
+
+When you move or rename a file that is imported by other files in your TypeScript project, VS Code can automatically update all import paths that reference the moved file.
+
+The typescript.updateImportsOnFileMove.enabled setting controls this behavior. Valid settings values are:
+
+* "prompt" - The default. Asks if paths should be updated for each file move.
+* "always" - Always automatically update paths.
+* "never" - Do not update paths automatically and do not prompt.
+
+VS Code comes with great debugging support for TypeScript, including support for sourcemaps. Set breakpoints, inspect objects, navigate the call stack, and execute code in the Debug Console. 
+
+
+Debug client side
+
+You can debug your client-side code using a browser debugger such as the built-in Edge and Chrome debugger, or the Debugger for Firefox.
+
+Debug server side
+
+Debug Node.js in VS Code using the built-in debugger. Setup is easy and there is a Node.js debugging tutorial to help you.
+
+
+Linters provides warnings for suspicious looking code. While VS Code does not include a built-in TypeScript linter, TypeScript linter extensions available in the marketplace.
+
+ESLint is a popular linter, which also supports TypeScript
+
+
+
+There is an excellent online IDE called StackBlitz (https://stackblitz.com).
+It’s powered by VS Code, but you don’t need to install it on your computer.
+
+
+### Summary
+
+* TypeScript is a superset of JavaScript. A program written in TypeScript has to be transpiled into JavaScript first, and then it can be executed in the browser or a standalone JavaScript engine.
+* Errors are caught by the TypeScript static code analyzer as you type, even before you compile code with the Typescript compiler (tsc).
+* TypeScript gives you the benefits of statically typed languages when and where you want it, without stopping you from using the good old dynamic JavaScript objects when you want them.
+* TypeScript follows the latest specifications of ECMAScript and adds to them types, interfaces, decorators, class member variables (fields), generics, enums, the keywords public, protected, and private, and more. Check the Type- Script roadmap at https://github.com/Microsoft/TypeScript/wiki/Roadmap to see what’s available now and what’s coming in future releases of TypeScript.
+* To start a new TypeScript project, run the command tsc --init in any direc- tory. It’ll create the tsconfig.json file for you, containing all the compiler’s options with most of them commented out. Uncomment them as needed.
+
+
+## 2 Basic and custom types
+
+* Declaring variables with types, and using types in function declarations
+* Declaring type aliases with the type keyword
+* Declaring custom types with classes and interfaces
+
+You can think of TypeScript as JavaScript with types.
+
+Although declaring types of identifiers before their use is highly recommended, it’s still optional.
+
+### Declaring variables with types
+
+Moreover, in JavaScript, you can assign a numeric value to a variable, and later assign a text value to that variable. This isn’t the case in TypeScript, where once the type is assigned to a variable, you can’t change its type
+
+In typescript, We didn’t do it explicitly assign type, but since we initialized it with a numeric value, TypeScript assigns the type number to taxCode.
+
+Although declaring variable types forces developers to write more code, their pro- ductivity increases in the long run because, more often than not, if a developer tries to assign a string value to a variable that already stores a number, it’s a mistake. It helps that the compiler can catch such errors during development rather than not discover- ing it until runtime.
+
+A type can be assigned to a variable either explicitly by the software developer or implicitly (an inferred type) by the Typescript compiler
+
+inferred type -> let taxCode = 1; 
+explicit type -> let taxCode: number = 1;
+
+### Basic type annotations
+
+TypeScript offers the following type annotations:
+
+
+* string — For textual data
+* boolean — For true/false values
+* number — For numeric values
+* symbol — A unique value created by calling the Symbol constructor
+* any — For variables that can hold values of various types, which may be unknown when you’re writing the code
+* unknown — A counterpart of any, but no operations are permitted on an unknown without first asserting or narrowing it to a more specific type
+* never — For representing unreachable code (we’ll provide an example shortly)
+* void — An absence of a value
+
+Starting with ECMAScript 2015, symbol is a primitive data type that is always unique and immutable. 
+In the following code snippet, sym1 is not equal to sym2: 
+
+```js
+const sym1 = Symbol("orderID");
+const sym2 = Symbol("orderID");
+```
+
+
+When you create a new symbol (note the absence of the new keyword), you can optionally provide its description, such as orderID. Symbols are typically used to create unique keys for object properties.
+
+Symbols as object properties
+
+```js
+const ord = Symbol('orderID');
+
+const myOrder = {
+  ord: "123"
+};
+
+console.log(myOrder[ord]);
+```
+
+Being a superset of JavaScript, TypeScript also has two special values: null and undefined
+
+You can assign null and undefined values to variables of any type, but more often they’re used in combination with values of other types.
+
+The following code snippet shows how you can declare a function that returns either a string or a null value
+
+```ts
+function getName(): string | null {
+
+}
+
+```
+
+As in most programming languages, if you declare a function that returns string, you can still return null, but being explicit about what a function can return increases code readability.
+
+If you declare a variable of type any, you can assign any value to it, whether it’s numeric, textual, Boolean, or a custom type like Customer
+
+You should avoid using the type any, because you’re losing the benefits of type checking, and the readability of your code suffers.
+
+The never type is assigned to a function that never returns—one that either keeps running forever or that just throws an error. The arrow function in the next listing never returns, and the type checker will infer (guess) its return type as never.
+
+```js
+const logger = () => {
+  while(true) {
+    console.log("The server is up and running");
+  }
+}
+```
+
+In the preceding listing, the type assigned to logger is () => never. In listing 2.9 you’ll see another example where the never type is assigned.
+The void type is not something you’d use in a variable declaration. It’s used to declare a function that doesn’t return a value:
+
+```ts
+function logError(errorMessage: string): void {
+  console.error(errorMessage);
+}
+```
+
+Unlike the never type, the void function does complete its execution, but it returns no value.
+
+If a function body doesn’t have a return statement, it still returns a value of type undefined. The void type annotation can be used to prevent programmers from accidentally returning an explicit value from the function.
+
+```ts
+let name2: string = 'John Smith';
+```
+
+In terms of code style, specifying types is redundant here.
+
+Although the second line is correct TypeScript syntax, specifying the type string is unnecessary, because the variable is initialized with the string and TypeScript will infer that the type of name2 is string.
+
+You should avoid explicit type annotations where the Typescript compiler can infer them. 
+
+TypeScript also allows you to use literals as types. The following line declares a variable of type John Smith.
+
+```ts
+let name3: 'John Smith';
+```
+
+We can say that the variable name3 has a literal type John Smith. The name3 variable will only allow one value, John Smith. Any attempt to assign another value to a vari- able of a literal type will result in a type checker error:
+
+It’s not likely that you’ll be using string literals for declaring a type as shown in the name3 variable, but you may use string literals as types in unions (explained in section 2.1.3) and enums (explained in chapter 4).
+
+Add explicit type annotations for function or methods signatures and public class members.
+
+
+#### Type widening
+
+If you declare a variable without initializing it with a specific value, TypeScript uses the internal types null or undefined, which are converted to any. This is called type widening.
+
+
+The value of the following variable would be undefined.
+let productId;
+productId = null;
+productId = undefined;
+
+
+The Typescript compiler applies type widening and assigns the type any to null and undefined values. 
+
+It’s worth mentioning that the Typescript compiler supports a --strictNullCheck option that prohibits the assignment of null to variables with known types
+
+let productId = 123;
+productId = null;  // compiler error
+productId = undefined;  // compiler error
+
+
+The --strictNullCheck option also helps in catching potentially undefined values. For example, a function may return an object with an optional property, and your code might wrongly assume that this property is there and try to apply a function on it.
+
+TypeScript includes other types that are used in interactions with the web browser, such as HTMLElement and Document. Also, you can use the key- words type, class, and interface to declare your own types, such as Cus- tomer or Person. We’ll show how to do that in the next section. You’ll also see how you can combine types using unions.
+
+Type annotations are used not only for declaring variable types, but also for declaring types of function arguments and their return values. We’ll discuss that next.
+
+### Types in function declarations
+
+TypeScript functions and function expressions are similar to JavaScript functions, but you can explicitly declare the types of arguments and return values.
+
+calculating tax in js
+
+```js
+function calcTax(sate, income, dependents) {
+  if(state === 'NY') {
+    return income * 0.06 - dependents * 500;
+  } else if(state === 'NJ') {
+    return income * 0.05 -dependents * 300;
+  }
+}
+```
+
+- correct way of calling function
+let tax = calcTax('NJ', 50000, 2);
+
+- wrong way of calling function -> NAN(not a number)
+let tax = calcTax('NJ', 50000, 'two');
+
+```ts
+function calcTax(satet: string. income: number, dependents: number) : number | undefined {
+  if(state === 'NY') {
+    return income * 0.06 - dependents * 500;
+  } else if(state === 'NJ') {
+    return income * 0.05 -dependents * 300;
+  }
+}
+```
+
+The Typescript compiler will display an error: “Argument of type string is not assign- able to parameter of type number.” Moreover, the return value of the function is declared as number, which stops you from making another mistake and assigning the result of the tax calculation to a non-numeric variable:
+
+The compiler will catch this, producing the error “The type ‘number’ is not assignable to type ‘string’: var tax: string.” This kind of type-checking during compilation can save you a lot of time on any project.
+
+This section has JavaScript and TypeScript versions of the calcTax() function, but they only process two states: NY and NJ. Invoking either of these functions for any other state will return undefined at runtime.
+The Typescript compiler won’t warn you that the function in listing 2.5 is poorly written and may return undefined, but the TypeScript syntax allows you to warn the person who reads this code that the function in listing 2.5 may return not only a number but also an undefined value, if you invoke it with any other state but NY or NJ. You should change this function signature to declare such a use case as follows:
+
+```ts
+function calcTax(state: string, income: number, dependents: number) : number | undefined
+```
+
+### The union type
+
+Unions allow you to express that a value can be one of several types. You can declare a custom type based on two or more existing types. For example, you can declare a vari- able of a type that can accept either a string value or a number (the vertical bar means union):
+
+```ts
+let padding: string | number;
+```
+
+Although the padding variable can store the value of either of the two specified types, at any given time it can be only of one type—either a string or a number.
+
+TypeScript supports the type any, but the preceding declaration provides some benefits compared to the declaration let padding: any
+
+```ts
+
+function padLeft(value: string, padding: any ): string {
+  if (typeof padding === "number") {
+    return Array(padding + 1).join(" ") + value;
+  }
+  if (typeof padding === "string") { 
+    return padding + value; 
+  }
+  throw new Error(`Expected string or number, got '${padding}'.`);
+}
+
+console.log( padLeft("Hello world", 4));
+console.log( padLeft("Hello world", "John says "));
+console.log( padLeft("Hello world", true));
+```
+
+### Type guards typeof and instanceof
+
+An attempt to apply conditional statements to refine a variable’s type is called type narrowing. In the if statement in listing 2.6, we used the typeof type guard to nar- row the type of a variable that can store more than one TypeScript type. We used typeof to find out the actual type of padding at runtime.
+
+Similarly, the instanceof type guard is used with custom types (with constructors), as will be explained in section 2.2. The instanceof guard allows you to check the actual object type at runtime:
+
+```ts
+if (person instanceof Person) {...}
+```
+
+The difference between typeof and instanceof is that the former is used with the built-in TypeScript types and the latter with the custom ones.
+
+If we now change the type of padding to the union of string and number (as shown in the following listing), the compiler will report an error if you try to invoke padLeft() providing anything other than string or number. This will also eliminate the need to throw an exception.
+
+```ts
+function padLeft(value: string, padding: string | number ): string {
+  if (typeof padding === "number") {
+    return Array(padding + 1).join(" ") + value;
+  }
+  if (typeof padding === "string") {
+    return padding + value;
+  }
+}
+```
+
+If you need to declare a variable that can hold values of more than one type, don’t use the type any; use a union such as let padding: string | number. Another choice is to declare two separate variables: let paddingStr: string; let paddingNum: number;.
+
+
+Let’s modify the code in listing 2.8 to illustrate the type never by adding an else clause to the if statement. This next listing shows how the type checker will infer the never type for an impossible value.
+
+else return padding, that blcok is never executed.
+
+the never type of an impossible value
+```ts
+function padLeft(value: string, padding: string | number ): string {
+  if (typeof padding === "number") {
+    return Array(padding + 1).join(" ") + value;
+  }
+  if (typeof padding === "string") {
+    return padding + value;
+  } else {
+    return padding;
+  }
+}
+```
+
+Since we declared in the function signature that the padding argument can be either string or number, any other value for padding is impossible. In other words, the else case is not possible, and the type checker will infer the type never for the padding vari- able in the else clause.
+
+Another benefit of using the union type is that IDEs have an autocom- plete feature that will prompt you with allowed argument types, so you won’t even have the chance to make such a mistake.
+
+If you use the union, the Typescript compiler will prevent incorrect invoca- tions of padLeft() by reporting an error at compile time.
+
+We just used a union of primitive types (string and number), but in the next sec- tion you’ll see how to declare unions of custom types.
+
+### Defining custom types
+
+TypeScript allows you to create custom types with the type keyword, by declaring a class or an interface, or by declaring an enum (covered in chapter 4). Let’s get familiar with the type keyword first.
+
+### Using the type keyword
+
+The type keyword allows you to declare a new type or a type alias for an existing type. Let’s say your app deals with patients who are represented by their name, height, and weight. Both height and weight are numbers, but to improve the readability of your code, you can create aliases hinting at the units in which the height and weight are measured.
+
+Declaring alias types Foot and Pound
+
+You can create a new Patient type and use the preceding aliases in its declaration.
+
+Declarations of type aliases don’t generate code in the compiled JavaScript. In Type- Script, declaring and initializing a variable of type Patient can look like the following.
+
+```ts
+type Foot = number;
+type Pound = number;
+
+type Patient = {
+  name: string,
+  hiehgt: Foot;
+  weight: Pound;
+}
+
+let patient: Patient = {
+    name: 'Joe Smith',
+    height: 5,
+    weight: 100
+}
+```
+
+What if, while initializing the patient variable, you forget to specify the value of one
+of the properties, such as weight?
+
+TypeScript will complain:
+"Type '{ name: string; height: number; }' is not assignable to type 'Patient'.
+  Property 'weight' is missing in type '{ name: string; height: number; }'."
+
+If you want to declare some of the properties as optional, you must add a question mark to their names. In the following type declaration, providing the value for the weight property is optional, and there won’t be any errors.
+
+```ts
+type Patient = {
+    name: string;
+    height: Height;
+    weight?: Weight;
+}
+
+let patient: Patient = {
+    name: 'Joe Smith',
+    height: 5
+}
+
+```
+You can use the question mark to define optional properties in classes or interfaces as well. 
+
+You can also use the type keyword to declare a type alias for a function signature. Imagine you’re writing a framework that should allow you to create form controls and assign validator functions to them. A validator function must have a specific signature— it must accept an object of type FormControl and return either an object describing the errors of the form control value, or null if the value is valid. You can declare a new ValidatorFn type as follows:
+
+```ts
+type ValidatorFn = (c: FormControl) => { [key: string]: any }| null
+```
+
+Here, { [key: string]: any } means an object that can have properties of any type, but the key has to be either of type string or convertable to a string.
+
+The constructor of the FormControl can have a parameter for the validator function, and it can use the custom ValidatorFn type as follows:
+
+
+```ts
+class FormControl {
+    constructor (initialValue: string, validator: ValidatorFn | null) {...};
+}
+```
+
+### Using classes as custom types
+
+We assume you’re familiar with the JavaScript classes covered in the appendix. In this section we’ll start showing you additional features that TypeScript brings to JavaScript classes
+
+JavaScript doesn’t offer any syntax for declaring class properties, but TypeScript does. In figure 2.2, on the left, you can see how we declared and instantiated a Person class that has three properties. The right side of figure 2.2 shows the ES6 version of this code produced by the Typescript compiler.
+
+
+
+As you can see, there are no properties in the JavaScript version of the Person class. Also, since the Person class didn’t declare a constructor, we had to initialize its proper- ties after instantiation. A constructor is a special function that’s executed once when the instance of a class is created.
+Declaring a constructor with three arguments would allow you to instantiate the Person class and initialize its properties in one line. In TypeScript you can provide type annotations for a constructor’s arguments, but there’s more.
+TypeScript offers the access level qualifiers public, private, and protected (cov- ered in chapter 3), and if you use any of them with the constructor arguments, the Typescript compiler will generate the code for adding these arguments as properties in the generated JavaScript object.
+
+Now the code of the TypeScript class (on the left) is more concise, and the generated JavaScript code creates three properties in the constructor. Note line 6 in figure 2.3 on the left. We declared the constant without specifying its type, but we could rewrite this line explicitly specifying the type of p as follows:
+
+```ts
+const p: Person = new Person("John", "Smith", 25);
+````

@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
+        "outDir": "./dist",
         "noEmitOnError": true,
-        "target": "es5",
+        "lib": ["dom","ES2015"],
         "watch": true
     }
 }
