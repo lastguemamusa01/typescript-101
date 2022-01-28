@@ -60,11 +60,26 @@ class block {
         readonly previousHash: string,
         readonly timestamp: number,
         readonly data: string
-    ) {
-        this.nonce = nonce;
-        this.hash = hash;
-    }
+    ) {}
 }
+
+interface PersonI {
+firstName: string;
+lastNmae: string;
+age: number;
+}
+
+function savePerson(person: PersonI): void {
+    console.log('Saving', person);
+}
+
+const personInterface: PersonI = {
+    firstName: "John",
+    lastNmae: "Smith",
+    age: 25
+};
+
+savePerson(personInterface);
 
 const p = new Person();
 p.firstName = "min ku";

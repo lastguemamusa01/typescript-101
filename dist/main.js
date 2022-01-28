@@ -31,8 +31,36 @@ var Person = /** @class */ (function () {
     }
     return Person;
 }());
+var PersonWithContructor = /** @class */ (function () {
+    function PersonWithContructor(firstName, lastName, age) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+    }
+    ;
+    return PersonWithContructor;
+}());
+var block = /** @class */ (function () {
+    function block(index, previousHash, timestamp, data) {
+        this.index = index;
+        this.previousHash = previousHash;
+        this.timestamp = timestamp;
+        this.data = data;
+    }
+    return block;
+}());
+function savePerson(person) {
+    console.log('Saving', person);
+}
+var personInterface = {
+    firstName: "John",
+    lastNmae: "Smith",
+    age: 25
+};
+savePerson(personInterface);
 var p = new Person();
 p.firstName = "min ku";
 p.lastName = "Smith";
 p.age = 25;
+var pImproved = new PersonWithContructor("aldo", "sam", 30);
 console.log(getFinalPrice(100, 10));
