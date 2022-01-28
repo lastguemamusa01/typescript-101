@@ -659,6 +659,7 @@ We assume you’re familiar with the JavaScript classes covered in the appendix.
 
 JavaScript doesn’t offer any syntax for declaring class properties, but TypeScript does. In figure 2.2, on the left, you can see how we declared and instantiated a Person class that has three properties. The right side of figure 2.2 shows the ES6 version of this code produced by the Typescript compiler.
 
+![image](https://user-images.githubusercontent.com/25869911/151487930-b9412d4c-b852-43bf-bcdf-c8468365305e.png)
 
 
 As you can see, there are no properties in the JavaScript version of the Person class. Also, since the Person class didn’t declare a constructor, we had to initialize its proper- ties after instantiation. A constructor is a special function that’s executed once when the instance of a class is created.
