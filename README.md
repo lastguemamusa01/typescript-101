@@ -783,4 +783,5 @@ The code in listing 2.21 wouldn’t compile because the cust reference variable 
 
 TIP We’ll come back to TypeScript’s structural typing in section 4.2 when we discuss generics.
 
+### Unions of custom types
 
