@@ -64,9 +64,9 @@ class block {
 }
 
 interface PersonI {
-firstName: string;
-lastNmae: string;
-age: number;
+    firstName: string;
+    lastNmae: string;
+    age: number;
 }
 
 function savePerson(person: PersonI): void {

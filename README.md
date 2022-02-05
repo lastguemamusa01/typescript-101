@@ -766,3 +766,21 @@ Defining a custom type with the type keyword offers the same features as inter- 
 ### Structural vs. nominal type systems
 
 
+A primitive type has just a name (such as number), whereas a more complex type like an object or class has a name and some structure, represented by properties (for example, a Customer class likely has name and address properties).
+
+How would you know if two types are the same or not? In Java (which uses a nomi- nal type system), two types are the same if they have the same names declared in the same namespace (a.k.a. packages). In a nominal type system, if you declare a variable of type Person, you can assign to it only an object of type Person or its descendant. In Java, the last line in the following listing won’t compile, because the names of the
+classes are not the same, even though they have the same structure.
+
+![](2022-02-05-15-17-02.png)
+
+
+
+TIP - The access-level modifiers affect type compatibility. For example, if we declared the name property of the Person class as private, the code in listing 2.19 wouldn’t compile.
+
+![](2022-02-05-15-17-51.png)
+
+The code in listing 2.21 wouldn’t compile because the cust reference variable would point to a Person object that wouldn’t even allocate memory for the age property, and an assignment like cust.age = 29 wouldn’t be possible. This time, the Person type is not assignable to the Customer type.
+
+TIP We’ll come back to TypeScript’s structural typing in section 4.2 when we discuss generics.
+
+
