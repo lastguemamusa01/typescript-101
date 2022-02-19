@@ -1674,3 +1674,360 @@ Summary
 * You can create your own generic classes, interfaces, and functions.
 
 ## 5 - decorators and advanced types
+
+* What the TypeScript decorators are for
+* How to create a new type based on an existing one using mapped types
+* How conditional types work
+* Combining mapped and conditional type
+
+Typescript goes further and offers you addi- tional derivative types that can be quite handy in certain scenarios.
+
+We used the word “advanced” in this chapter’s title for a couple of reasons. First, you don’t have to know these types to be a productive member of your team. Second, their syntax may not be immediately obvious to a software developer who’s familiar with other programming languages.
+
+### Decorators
+
+decorator - a special kind of declaration that can be attached to a class declaration, method, accessor, property, or parameter. Decorators use the form @expression, where expression must evaluate to a function that will be called at runtime with information about the decorated declaration.
+
+Say you have class A {...}, and there’s a magic decorator called @Injectable() that knows how to instantiate classes and inject their instances into other objects. We could decorate one of our classes like this:
+
+@Injectable() class A {}
+
+As you can guess, the @Injectable() decorator will somehow change the behavior of class A. Alternatively, we could change the behavior of class A without modifying its code by creating a subclass of class A and adding or overriding the behavior there.
+But simply adding a decorator to the class definition looks more elegant
+
+We could also say that a decorator adds metadata to a specific target, which is class A in our example. In general, metadata is additional data about some other data. Take an mp3 file—we can say that the song is the data. But the mp3 file may have additional properties, like the name of the artist and album, an image, and so on— this is the metadata of the mp3 file. Thus you can use decorators to annotate a Type- Script class with metadata describing additional features you’d like this class to have.
+
+Names of TypeScript decorators start with the @ sign, such as @Component. You can write your own decorators, but it’s more likely that you’ll use the decorators available in a library or framework.
+
+```ts
+class OrderComponent {
+  quantity: number;
+}
+```
+
+Imagine that you want to turn this class into a UI component. Moreover, you want to declare that the value for the quantity property will be provided by the parent com- ponent. If you were using the Angular framework with TypeScript, you could use the built-in @Component() decorator for a class and @Input() for a property.
+
+```ts
+// this component can be used in HTML as <order-processor>
+@Component({
+    selector: 'order-processor',
+    template: `Buying {{quantity}} items`
+})
+
+export class OrderComponent {
+    // the value for this input property is provided by the parent component
+    @Input() quantity: number; 
+}
+```
+
+In Angular, the @Component() decorator can be applied only to a class, and it supports various properties, such as selector and template. The @Input() decorator can be applied only to the properties of a class. We could also say that these two decorators pro- vided metadata about the OrderComponent class and the quantity property respectively.
+
+To make decorators useful, there should be some code that knows how to parse them and to do what these decorators prescribe. In the example from listing 5.1, the Angular framework would parse these decorators and generate additional code to turn the OrderComponent class into a renderable UI component.
+
+where the decorators area used : 
+
+* nest.js framework
+* mobx and ui library
+* angular
+
+TypeScript doesn’t come with any built-in decorators, but you can create your own or use the ones provided by a framework or library of your choice.
+
+The decorators in listing 5.1 allowed you to specify additional behavior for the class and its property in a concise and declarative manner. Of course, using decorators is not the only way to add behavior to an object. For example, the creators of Angular could have created an abstract UIComponent class with a particular constructor and forced developers to extend it every time they wanted to turn a class into a UI component. But using decorator components is a nicer, more readable and declarative solution.
+
+Decorators (unlike inheritance) separate the concerns and facilitate easier code maintenance, since the framework is free to interpret them as it wants. In contrast, if a component was a subclass, it could override or just expect or rely on certain behavior of the methods in the superclass.
+
+There is a proposal to add decorators to JavaScript. The proposal is currently a Stage 2 draft (https://tc39.github.io/proposal-decorators).
+
+Although decorators were introduced back in 2015, they are still considered an exper- imental feature, and you have to compile your app with the --experimentalDecorators tsc option. If you use tsconfig.json, add the following compiler option there:
+
+```json
+"experimentalDecorators": true
+```
+
+### Creating class decorators
+
+A class decorator is applied to a class, and the decorator function is executed when the constructor executes. A class decorator requires one parameter—a constructor function for the class. In other words, a class decorator will receive the constructor function of the decorated class.
+
+The following listing declares a class decorator that just logs information about the class on the console.
+
+```ts
+// declares the decorator, which take a constructor function as an argument
+function whoAmI( target: Function): void {
+  // log the target class information
+  console.log(`You are: \n ${target}`)
+}
+```
+
+If the return type of a class decorator is void, this function doesn’t return any value (see section 2.1.1). Such a decorator won’t replace the class declaration—it’ll just observe the class, as in listing 5.3. But a decorator can modify a class declaration, in which case it would need to return the modified version of the class (the constructor function), and we’ll show you how to do that at the end of this section.
+
+To use the whoAmI decorator, just prepend the class name with @whoAmI. The construc- tor function of the class will be automatically provided for the decorator. In our exam- ple, the constructor has two arguments: a string and number.
+
+```ts
+@whoAmI
+class Friend {
+  contructor(private name: string, private age:number) {}
+}
+```
+
+When the TypeScript code is transpiled into JavaScript, tsc checks if any decorators were applied, in which case it will generate additional JavaScript code that will be used at runtime.
+
+result :
+```console
+You are:
+function Friend(name, age) {
+  this.name = name;
+  this.age = age;
+}
+```
+
+You may think that the @whoAmI decorator is not overly useful, so let’s create another one. Say you’re developing a UI framework and want to allow classes to be turned into UI components in a declarative way. You want to create a function that takes an arbi- trary argument, such as an HTML string for rendering.
+
+```ts
+// this decorator factory has an argument
+function UIcomponent(html: string) {
+  // prints the string received by the decorator
+  console.log(`The decorator received ${html} \n`);
+
+  // this is a decorator function.
+  return function(target: Function) {
+    console.log(`Someone wants to create a UI component from \n ${target} `);
+  }
+}
+```
+
+Here you see a decorator function inside another function. We can call the outer function a decorator factory. It can take any arguments and apply some app logic to decide which decorator to return. In this case, listing 5.4 has just one return state- ment, and this code always returns the same decorator function, but nothing stops you from conditionally returning the decorator you need based on the parameters provided to the factory function.
+
+A bit later, in the sidebar titled “Formal declarations of decorator sig- natures,” you’ll see that the requirements for decorator signatures depend on what they decorate. So how were we able to use an arbitrary argument in the UIComponent() function? The reason is that UIComponent() is not a decora- tor, but a decorator factory that returns a decorator with the proper function (target: Function) signature.
+
+The next listing shows the Shopper class decorated as UIcomponent.
+
+```ts
+// passes HTML to the decorator
+@UIcomponent('<h1>Hello Shopper!</h1>')
+class Shopper {
+  // A class contructor that takes a shopper's name
+  contructor(private name: string) {}
+}
+```
+
+output: 
+
+```console
+The decorator received <h1>Hello Shopper!</h1>
+
+Someone wants to create a UI component from
+function Shopper(name) {
+        this.name = name;
+}
+```
+
+So far, all our decorator examples observed the classes—they didn’t modify class declarations. In the next example, we’ll show you a decorator that does. But first, we’ll show you a constructor mixin.
+
+In JavaScript, a mixin is a piece of code that implements a certain behavior. Mixins
+are not meant to be used alone, but their behavior can be added to other classes. Although JavaScript doesn’t support multiple inheritance, you can compose behaviors from multiple classes using mixins.
+
+If a mixin has no constructor, mixing its code with other classes comes down to copying its properties and methods to the target class. But if a mixin has its own con- structor, it needs to be capable of taking any number of parameters of any type; other- wise it wouldn’t be “mixable” with arbitrary constructors of target classes.
+
+TypeScript supports a constructor mixin that has the following signature: 
+
+```ts
+{ new(...args: any[]): {} }
+```
+
+It uses a single rest argument (three dots) of type any[] and can be mixed with other classes that have constructors. Let’s declare a type alias for this mixin:
+
+```ts
+type constructorMixin = { new(...args: any[]): {} };
+```
+
+Accordingly, the following signature represents a generic type T that extends constructorMixin; in TypeScript, this also means that type T is assignable to the constructorMixin type:
+
+```ts
+<T extends constructorMixin>
+```
+
+You’ll use this signature to create a class decorator that modifies the original construc- tor of a class. The class decorator signature will look like this:
+
+```ts
+function <T extends constructorMixin> (target: T) {
+  // this decorator is implemented here
+}
+```
+
+Now we’re prepared to write a decorator that modifies the declaration (and construc- tor) of a target class. Let’s say we have the following Greeter class.
+
+undecorated Greeter class
+
+```ts
+class Greeter {
+  contructor(public name: string) {}
+  sayHello() { console.log(`Hello ${this.name}`);}
+}
+
+const grt = new Greeter('min ku');
+grt.sayHello(); // prints "Hello min ku"
+```
+
+We want to create a decorator that can accept a salutation parameter, and add to the class a new message property, concatenating the given salutation and name. 
+Also, we want to change the code of the sayHello() method so that it prints the message.
+
+The following listing shows a higher-order function (a function that returns a func- tion) that implements our decorator. We can also call it a factory function because it constructs and returns a function
+
+```ts
+type constructorMixin = { new(...args: any[]): {} };
+
+// a factory function that takes one parameter- saludation
+function useSalutation(saludation: string) {
+  // the decorator's body
+  return function <T extends contructorMixin> (target: T) {
+    // redeclares the decorated class
+    return class extends target {
+      name: String;
+      // adds a private property to the new class
+      private message =  'Hello ' + salutation + this.name;
+      //redeclares the method
+      sayHello() { console.log(`${this.message}`);}
+    }
+  }
+}
+```
+
+Starting from the return class extends target line, we provide another declaration of the decorated class. In particular, we’ve added a new message property to the original class and replaced the body of the sayHello() method so that it uses the salutation pro- vided in the decorator.
+In the next listing, we use the @useSalutation decorator with the Greeter class. Invoking grt.sayHello() will print “Hello Mr. Smith.”
+
+```ts
+// applies the decorator withe an argument to the class
+@useSaludation("Mr. ")
+class Greeter {
+  contructor(public name: string) {}
+  sayHello() { console.log(`Hello ${this.name}`);}
+}
+
+const gtr = new Greeter("min ku");
+gtr.sayHello();
+
+```
+
+It’s great that we have such a powerful mechanism for replacing a class declaration, but use it with caution. Avoid changing the public API of a class, because the static type analyzer won’t offer autocomplete for decorator-added public properties or methods
+
+Say you modified the useSalutation() decorator so it would add a public sayGood- bye() method to the target class. After typing grt., as in listing 5.8, your IDE would still only prompt you with the sayHello() method and the name property. It wouldn’t sug- gest sayGoodbye(), even though typing grt.sayGoodbye() will work just fine.
+
+Formal declarations of decorator signatures
+
+A decorator is a function, and its signature depends on the target. Signatures for class and method decorators won’t be the same. After you install TypeScript, it will include several files with type declarations. One of them is called lib.es5.d.ts, and it includes type declarations for decorators for various targets
+
+```ts
+// The signature for a class decorator
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+// The signature for a property decorator
+declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
+// The signature for a method decorator
+declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
+// The signature for a parameter decorator
+declare type ParameterDecorator = (target: Object, propertyKey: string | symbol, parameterIndex: number) => void;
+```
+
+In section 4.2.3, we explained generic functions and the syntax for named functions as well as fat arrow functions. That section should help you in understanding the sig- natures shown in the preceding code. Consider the following line:
+
+```ts
+<T>(someParam: T) => T | void
+```
+
+That’s right—it declares that a fat arrow function can take a parameter of a generic type T and return either the value of type T or void. Now let’s try to read the decla- ration of the ClassDecorator signature:
+
+```ts
+<TFunction extends Function>(target: TFunction) => TFunction | void
+```
+
+It declares that a fat arrow function can take a parameter of a generic type TFunc- tion, which has an additional constraint: the concrete type must be a subtype of Function. Any TypeScript class is a subtype of Function, which represents a con- structor function. In other words, the target for this decorator must be a class, and the decorator can either return a value of this class’s type or return no value.
+
+Take another look at the @whoAmI class decorator shown in listing 5.2. We didn’t use a fat arrow expression there, but that function had the following signature, which is allowed for class decorators:
+
+```ts
+function whoAmI (target: Function): void
+```
+
+Because the signature of the whoAmI() function doesn’t return a value, we can say that this decorator just observes the target. If you wanted to modify the original target in the decorator, you’d need to return the modified class, but its type would be the same as that originally provided in lieu of TFunction (a subtype of Function).
+
+### Creating method decorators
+
+Now let’s create a decorator that can be applied to a class’s method. For example, you may want to create a @deprecated decorator to mark methods that will be removed soon. As you can see in the sidebar titled “Formal declarations of decorator signa- tures,” the MethodDecorator function requires three parameters:
+
+* target—An object that refers to the instantiated class that defines the method 
+* propertyKey—The name of the method being decorated
+* descriptor—A descriptor of the method being decorated
+
+The descriptor parameter contains an object describing the method that your code is decorating. Specifically, TypedPropertyDescriptor has a value property that stores the original code of the decorated method. By changing the value of this property inside the method’s decorator, you can modify the original code of the decorated method.
+
+Let’s consider a Trader class that has a placeOrder() method:
+
+```ts
+class Trade {
+  placeOrder(stockNmae: string, quantity:number, operation: string, traderId:number) {
+    // the method implementation goes here
+  }
+  // other methods go here
+}
+
+const trade = new Trade();
+trade.placeOrder('IBM', 100, 'Buy', 123);
+```
+
+This code has worked fine for years, but a new regulation came in: “For audit pur- poses, all trades must be logged.” One way to do this is to go through all methods related to buying or selling financial products, which may have different parameters, and add code that logs their invocations. But creating a @logTrade method decorator that works with any method and logs the parameters would be a more elegant solu- tion. The following listing shows the code of the @logTrade method decorator.
+
+```ts
+function logTrade(target, key, descriptor) {
+  // Stores the original method's code
+  const originalCode = descriptor.value;
+  // modifies the code of the method being decorated
+  descriptor.value = function () {
+    console.log(`Invoked ${key} providing:`, arguemnts);
+    //invokes the target method
+    return originalCode.apply(this, arguments);
+  }
+  // return the modified method
+  return descriptor;
+}
+```
+
+We stored the original method’s code and then modified the received descriptor by adding a console.log() statement. Then we used the JavaScript function apply() to invoke the decorated method. Finally, we returned the modified method descriptor.
+
+In the following listing we applied the @logTrade decorator to the method placeOrder(). No matter how placeOrder() is implemented, its decorated version will start by printing this message: “Invoked placeOrder providing:”.
+
+```ts
+class Trade {
+  // Decorates the placeOrder() method
+  @logTrade
+  placeOrder(stockNmae: string, quantity:number, operation: string, traderId:number) {
+    // the method implementation goes here
+  }
+}
+
+const trade = new Trade();
+// invokes placeOrder()
+trade.placeOrder('IBM', 100, 'Buy', 123);
+```
+
+output : 
+
+```console
+ Invoked placeOrder providing:
+       Arguments(4)
+       0: "IBM"
+       1: 100
+2: "Buy"
+3: 123
+```
+
+By creating a method decorator, we eliminated the need to update the code of poten- tially many trade-related methods that require auditing. Besides, the @logTrade deco- rator can work with methods that haven’t even been written yet.
+
+We’ve shown you how to write class and method decorators, which should give you a good foundation for mastering property and parameter decorators on your own.
+
+### Mapped types
+
+Mapped types allow you to create new types from existing ones. This is done by apply- ing a transformation function to an existing type. Let’s see how they work.
+
+#### The Readonly mapped type
+
+
+
