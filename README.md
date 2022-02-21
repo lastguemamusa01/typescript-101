@@ -2670,3 +2670,48 @@ Now create a tslint.json configuration file using the following command:
 * To deploy a web app, we usually bundle up the source files to decrease the num- ber of files the browser needs to download. Webpack is one of the most popular bundlers.
 * JavaScript developers use Babel to compile code that uses a newer ECMAScript syntax into code that’s supported by specific versions of web browsers. In some cases it make sense to use both TypeScript and Babel compilers.
 * Knowing the syntax of any programming language is important, but under- standing the process of how your program could be turned into a working run- nable app is equally important.
+
+
+## 7 - Using TypeScript and JavaScript in the same project
+
+* Enjoying TypeScript’s benefits when working with a JavaScript library
+* The role of type definition files
+* Upgrading an existing JavaScript app to TypeScript
+
+In this chapter, we’ll show how you can benefit from TypeScript features such as getting compilation errors and autocomplete even while using third-party libraries written in JavaScript. We’ll start by explaining the role of type definition files, and then we’ll discuss a concrete use case where an app written in TypeScript uses a JavaScript library. Finally, we’ll discuss the things you should consider before imple- menting a gradual upgrade of your app from JavaScript to TypeScript.
+
+### Type definition files
+
+![](2022-02-21-16-18-29.png)
+
+![](2022-02-21-16-18-50.png)
+
+![](2022-02-21-16-19-03.png)
+
+![](2022-02-21-16-19-59.png)
+
+
+### a sample typescript app that uses javascript libraries
+
+![](2022-02-21-16-27-02.png)
+
+![](2022-02-21-16-30-27.png)
+
+![](2022-02-21-16-47-41.png)
+
+![](2022-02-21-17-14-00.png)
+
+![](2022-02-21-17-28-40.png)
+
+
+![](2022-02-21-17-29-02.png)
+
+![](2022-02-21-17-29-16.png)
+
+### Summary
+
+* You can use thousands of existing JavaScript libraries in your TypeScript project.
+* Type definition files allow you to enjoy the type-checking and autocomplete fea- tures in libraries that were written in JavaScript. These files make you more productive in writing code.
+* You can create type definition files for any proprietary JavaScript code.
+* Even if a JavaScript library doesn’t have a type definition file, you can still use it in your TypeScript project.
+* There are well-defined steps that allow you to gradually upgrade your existing JavaScript code to TypeScript.
