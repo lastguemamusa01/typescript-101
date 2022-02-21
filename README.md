@@ -2029,5 +2029,644 @@ Mapped types allow you to create new types from existing ones. This is done by a
 
 #### The Readonly mapped type
 
+Imagine that you need to pass objects of type Person (shown next) to the doStuff() function for processing:
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+}
+```
+
+The Person type is used in multiple places, but you don’t want to allow the doStuff() function to accidentally modify some of the Person’s properties, like age in the follow- ing listing.
+
+the unlawful change of the age
+
+```ts
+const worker: Person = (name: "Min", age:22);
+
+funciton doStuff(person: Person) {
+  // we don't want to allow this.
+  person.age =25;
+}
+```
+
+No properties of the Person type were declared with the readonly modifier. Should we declare another type just to be used with doStuff(), as follows?
+
+```ts
+interface ReadonlyPerson {
+  readonly name: string;
+  readonly age: number;
+}
+```
+
+Do you need to declare (and maintain) a new type each time you need a read-only ver- sion of an existing one? There’s a better solution. We can use a built-in mapped type, Readonly, to turn all the properties of a previously declared type to be readonly. We just need to change the signature of the doStuff() function to take an argument of type Readonly<Person> instead of Person.
+
+Using the mapped type Readonly
+
+```ts
+const worker: person = (name: "min ku", age 22);
+
+// modifies the existing type with the mapped type Readonly
+function doStuff(person: Readonly<Person>) {
+  // this line generates a compiler error
+  person.age = 25;
+}
+```
+
+To understand why an attempt to change the value of the age property generates a compiler error, you need to see how the Readonly type is declared, which in turn requires an understanding of the keyof lookup type.
+
+KEYOF AND A LOOKUP TYPE
+
+Reading the declarations of the built-in mapped types in the typescript/lib/lib.es5.d.ts file can help you understand their inner workings, but it requires some familiarity with TypeScript’s index type query keyof and a lookup type.
+
+You can find the following declaration of the Readonly mapping function in lib.es5.d.ts:
+
+```ts
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+```
+
+Usually the letter T in generics represents type : K for key, V for value, P for property, and so on.
+
+keyof is also called an index type query, and it represents a union of allowed property names (the keys) of the given type. If the type Person is our T, then keyof T would represent a union of name and age.
+
+Figure 5.1 shows a screenshot taken while hovering the mouse over the propNames custom type. As you can see, the type of propName is a union of name and age.
+
+figure 5.1
+
+```ts
+interface person {
+  name: string;
+  age: number;
+}
 
 
+// propNmae = "name" | "age"
+type propNames = keyof Person;
+```
+
+In listing 5.13, the fragment [P in keyof T] means “give me the union of all the properties of the given type T.” This fragment looks as if we’re accessing the elements of some object, but actually, this is done to declare types. The keyof type query can be used only in type declarations.
+
+We now know how to get access to the property names of a given type, but to create a mapped type from an existing one, we also need to know the property types. In case of the Person type we need to be able to find out programmatically that the property types are string and number.
+
+This is what lookup types are for. The piece T[P] (from listing 5.13) is a lookup type, and it means “Give me the type of a property P.” Figure 5.2 shows a screenshot taken while hovering the mouse over the propTypes type. The types of the proper- ties are string and number.
+
+figure 5.2
+
+```ts
+type = propNames = keyof Person;
+
+// propTypes = string | number
+type propTypes = Person[propNames];
+```
+
+Now let’s read the code in listing 5.13 one more time. The declaration of the Readonly<T> type means “Find the names and types of the properties of the provided concrete type, and apply the readonly qualifier to each property.” In our example, Readonly<Person> will create a mapped type that will look like the following.
+
+```ts
+interface Person {
+  readonly name: string;
+  readonly age: number;
+}
+```
+
+Now you can see why an attempt to modify the person’s age results in the compiler error “Cannot assign to age because it’s a read-only property.” Basically, we took an existing type, Person, and mapped it to a similar type but with read-only properties.
+
+You may say, “OK, I understand how to apply the mapped type Readonly, but what’s the practical use of it?” Later, in listing 10.16, you’ll see two methods that use the Readonly type with their message argument, something like this:
+
+```ts
+replyTo(client: WebSocket, message: Readonly<T>): void
+```
+
+This method can send messages to blockchain nodes over the WebSocket protocol. The messaging server doesn’t know what types of messages will be sent, and the mes- sage type is generic. To prevent accidental modification of the message inside replyTo(), we use the Readonly mapped type there.
+
+Let’s consider one more code sample that illustrates the benefits of using keyof and T[P]. Imagine we need to write a function to filter a generic array of objects, keeping only those that have a specified value in a specified property. In the first ver- sion, we won’t use type checking and will write the function as follows.
+
+A poor version of filterBy()
+
+```ts
+function filterBy<T> ( property: any, value: any, array: T[]) {
+  // keeps only those objects that have the provdied value in the specified property
+  return array.filter(item => item[property] === value);
+}
+```
+
+Calling this function with a non-existing property name or the wrong value type will result in hard-to-find bugs.
+
+The following listing declares a Person type and function. The last two lines invoke the function, providing either a non-existing lastName property or the wrong type for age.
+
+A buggy version of filterBy()
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+}
+
+const persons: Person[] = [
+    { name: 'John', age: 32 },
+    { name: 'Mary', age: 33 },
+];
+
+// this function doesn't do any type checking
+function filterBy<T> ( property: any, value: any, array: T[]) {
+  // filters data based on the property/value
+  return array.filter(item => item[property] === value);
+}
+
+// a correct invocation of the function
+console.log(filterBy('name', 'John', persons));
+// an incorrect invocation of the function
+console.log(filterBy('lastName', 'John', persons));
+// an incorrect invocation of the function
+console.log(filterBy('age', 'twenty', persons));
+```
+
+Both of the last two code lines will return zero objects without any complaints, even though the Person type has no lastName property and the type of the age property is not a string. In other words, the code in listing 5.16 is buggy.
+Let’s change the signature of the filterBy() function so it catches these bugs at compile time. The new version of filterBy() is shown in the following listing.
+
+```ts
+// Checks that the provided property, P, belongs to the union [keyof T]
+
+function filterBy<T, P extends keyof T> ( property: P, value: T[P], array: T[]) {
+  return array.filter(item => item[property] === value);
+}
+```
+
+First of all, the fragment <T, P extends keyof T> tells us that our function accepts two generic values: T and P. We also added a restriction that P extends keyof T. In other words, P must be one of the properties of the provided type T. If the concrete type of T is Person, then P can be either name or age.
+
+The function signature in listing 5.17 has yet another restriction, value: T[P], which means the provided value must be of the same type as that declared for P in type T. That’s why the following lines will give compile errors.
+
+```ts
+// Non-existing lastName property
+filterBy('lastName', 'John', persons)
+// The value of age must be a number.
+filterBy('age', 'twenty', persons)
+```
+
+As you see, introducing keyof and a lookup type in the function signature allows you to catch possible errors at compile time.
+
+5-18.ts
+
+### Declaring your own mapped types
+
+Listing 5.13 shows the transformation function for the built-in Readonly mapped type. You can define your own transformation functions using similar syntax.
+
+Let’s try to define a Modifiable type—the opposite of Readonly. In the previous section, we took a Person type and made all of its properties read-only by applying the Readonly mapped type: Readonly<Person>. Now suppose the properties of the Per- son type were originally declared with the readonly modifier as follows:
+
+```ts
+interface Person {
+  readonly name: string;
+  readonly age: number;
+}
+```
+
+How could you remove the readonly qualifiers from the Person declaration if you needed to? There’s no built-in mapped type for that, so let’s declare one.
+
+
+```ts
+type Modifiable<T> = {
+  -readonly[P in keyof T]: T[P];
+};
+
+```
+The minus sign in front of the readonly qualifier removes it from all properties of the given type. Now you can remove the readonly restriction from all properties by apply- ing the Modifiable mapped type.
+
+pplying the Modifiable mapped type
+
+```ts
+interface Person {
+  readonly name: string;
+  readonly age: number;
+}
+
+// Results in a compiler error
+const worker1: Person = {name: "John", age: 25}; 
+worker1.age = 27; 
+
+//  No errors here
+const worker2: Modifiable<Person> = {name: "John", age: 25}; 
+worker2.age = 27;
+
+```
+
+### ther built-in mapped types
+
+You know that if a property name in a type declaration ends with the modifier ?, the property is optional. Say we have the following declaration of the Person type:
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+}
+```
+
+Since none of the property names end with a question mark, providing values for name and age is mandatory. What if you need a type that has the same properties as Person, but all of its properties should be optional? This is what the mapped type Partial<T> is for. Its mapping function is declared in lib.es5.d.ts as follows.
+
+```ts
+type Partial<T> = {
+    [P in keyof T]?: T[P];
+};
+```
+
+Have you spotted the question mark there? Basically, we create a new type by append- ing the question mark to each property name of the given type. The mapped type Partial makes all properties in the given type optional.
+
+```ts
+
+// error
+const worker1: Person = { name: "john"};
+// ok
+const worker2: Partial<Person> = { name: "john"};
+
+```
+You can now make all properties of a type optional, but can you do the opposite? Can you take a type that was declared with some optional properties, and make all of them required? You bet! This can be done with the Required mapped type, which is declared as follows:
+
+```ts
+type Required<T> = {
+    [P in keyof T]-?: T[P];
+};
+```
+
+The -? means it’s removing the modifier ?.
+
+```ts
+interface Person {
+  name?: string;
+  age?: number;
+}
+
+// ok
+const worker1: Person = { name: "john"};
+// error
+const worker2: Required<Person> = { name: "john"};
+```
+
+TIP - The Required type was introduced in TypeScript 2.8. If your IDE doesn’t recognize this type, make sure it uses the proper version of the TypeScript lan- guage service. In Visual Studio Code you can see the version in the bottom-right corner. Click on it to change to a newer version if you have one installed.
+
+You can apply more than one mapped type to a given type. In the following listing, we apply Readonly and Partial to the Person type. The former will make each property read-only, and the latter will make each property optional.
+
+```ts
+interface Person {
+   name: string;
+   age: number;
+}
+
+// worker1 is still a Person, but its properties are read-only and optional.
+// Initializes the property name but not the optional age
+const worker1: Readonly<Partial<Person>> = {name: "John"};
+
+// name is read-only and can be initialized only once.
+worker1.name = "Mary"; // compiler's error
+```
+
+TypeScript offers yet another useful mapped type called Pick. It allows you to declare a new type by picking a subset of properties of the given type. Its transformation func- tion looks like this:
+
+```ts
+type Pick<T, K extends keyof T> = {
+    [P in K]: T[P];
+};
+```
+
+The first argument expects an arbitrary type, T, and the second expects a subset, K, of the properties of T. You can read it as “from T, pick a set of properties whose keys are in the union K.” The next listing shows the Person type, which has three properties. With the help of Pick, we declare a PersonNameAddress mapped type that has two string properties: name and address.
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+  address: string;
+}
+
+type PersonNameAddress(T,K) = PICK<Person, 'name'|'address'>;
+```
+
+You may be thinking, “The discussion of built-in mapped types is good, and they do seem to be useful, but do I need to know how to implement my own?” The answer is yes, and you’ll see examples of using the Pick mapped type to define a custom mapped type shortly in figure 5.5 and later on in chapter 10 in the sidebar titled “Examples of conditional and mapped types.”
+Mapped types allow you to modify existing types, but TypeScript offers yet another way of changing a type based on some condition. We’ll look at this next.
+
+### Conditional types
+
+With mapped types the transformation function is always the same, but with condi- tional types the transformation depends on a specific condition.
+Many programming languages, including JavaScript and TypeScript, support con- ditional (ternary) expressions:
+
+```ts
+a < b ? doSomething() : doSomethingElse()
+```
+
+If the value of a is less than b, this code line invokes the function doSomething(), oth- erwise it invokes doSomethingElse(). This expression checks the values and condition- ally executes different code. A conditional type would similarly use a conditional expression, but it would check the expression’s type.
+
+A conditional type will always be declared in the following form:
+
+```ts
+ T extends U ? X : Y
+```
+
+Here, extends U means “inherits from U” or “is U.” As with generics, these letters can represent any types.
+
+In object-oriented programming, the declaration class Cat extends Animal means that Cat is Animal and Cat has the same (or more) features as Animal. Another way to put it is that a cat is a more specific version of an animal. This also means that the Cat object can be assigned to a variable of type Animal.
+
+But can an Animal object be assigned to a variable of type Cat? No, it can’t. Every cat is an animal, but not every animal is a cat.
+Similarly, the expression T extends U ? checks if T is assignable to U. If this is true, we’ll use type X, and otherwise type Y. The expression T extends U means that the value of type T can be assigned to a variable of type U.
+
+Let’s consider a function that can have different return types based on some condi- tion. Specifically, we want to write a getProducts() function that should return the type Product if a numeric product ID was provided as an argument. Otherwise, this function has to return a Product[] array. Using conditional types, the signature of this function could look like this:
+
+```ts
+function getProducts<T>(id?: T): T extends number ? Product : Product[]
+```
+
+If the type of the argument is number, then the return type of this function is Product; otherwise Product[].
+The following listing includes a sample implementation of such a function. If the provided optional id is a number, we return one product; if not, we return an array of two products.
+
+```ts
+class Product {
+  id: number;
+}
+
+// declares a conditional return type
+const getProducts = function<T>(id?:T): T extends number ? Product: Product[] {
+  // check the type of the provided argument
+
+  if(typeof id === 'number') return { id: 123 } as any;
+  else return [{ id: 123 }, {id: 567}] as any;
+}
+
+const result1 = getProducts(123);
+const result2 = getProducts();
+
+```
+
+he type of the result1 variable is Product, and the type of result2 is Product[].
+
+5-24.ts
+
+In listing 5.24, we used the as type assertion, which tells TypeScript that it shouldn’t be inferring the type because you know about this type better than Type- Script does.
+
+ The as any means “TypeScript, don’t complain about this type.” The problem is that the narrowed type of id is not picked up by the conditional type, so the function can’t evaluate the condition and narrow the return type to Product.
+
+Section 3.1.6 had a similar example, where we implemented a getProducts() function that could be invoked with or without an argument (see listing 3.9). There, getProducts() was implemented using method overloading.
+Conditional types can be used in many different scenarios. Let’s discuss another use case.
+
+TypeScript has a built-in conditional Exclude type, which allows you to discard the specified types. Exclude is declared in the lib.es5.d.ts file as follows:
+
+```ts    
+type Exclude<T, U> = T extends U ? never : T;
+```
+This type excludes types that are assignable to U. Note the use of the type never, which means “this should never exist; filter it out.” If the type T is not assignable to U, then keep it.
+
+Let’s say we have a Person class, and we use this class in multiple places in the app for the popular TV show The Voice:
+
+```ts
+class Person {
+  id: number;
+  name: string;
+  age: number;
+}
+```
+
+All the vocalists must go through blind auditions, where the judges can’t see them and know nothing about them. For these auditions, we want to create another type, which is the same as Person except it won’t have their names or ages. In other words, we want to exclude the name and age properties from the Person type.
+
+From the previous section, you remember that the keyof lookup type can give you a list of all properties from a type. Hence, the following type will contain all the prop- erties of T except those that belong to the given type K:
+
+```ts
+type RemoveProps<T, K> = Exclude<keyof T, K>;
+```
+
+Let’s create a new type that will be like Person minus name and age:
+
+```ts
+type RemainingProps = RemoveProps<Person, 'name' | 'age'>;
+```
+
+In this example, the type K is represented by the union 'name' | 'age', and the RemainingProps type represents the union of the remaining properties, which is only id in our example.
+
+Now we can construct a new type that will contain just the RemainingProperties with the help of the Pick mapped type (which was illustrated previously in listing 5.24).
+
+```ts
+type PersonBlindAuditions = Pick<Person, ReminingProps>;
+```
+
+Person BlindAuditions will be The Person type, minus two properties
+
+5-5.ts
+
+You might say “Wouldn’t it be easier to create a separate PersonBlindAuditions type that has just the id property?” This might be true in this simple case, where the Per- son type has just 3 properties. But a person could be described by 30 properties, and we might want to use it as a base class and create more descriptive conditional types based on it.
+
+Even with our 3-property class, using conditional types can be beneficial. What if some time down the road a developer decides to replace the name property with first- Name and lastName in the Person class? If you used the PersonBlindAuditions condi- tional type, its declaration would start giving you a compile error, and you’d fix it. But if you didn’t declare PersonBlindAuditions as a conditional type, and simply created an independent PersonBlindAuditionsIndie class, the developer who renamed the properties in Person would need to remember to replicate the changes in the Person- BlindAuditionsIndie class.
+
+Besides, the RemoveProperties type is generic. You can use it to remove any properties from any types.
+
+#### the infer keyword
+
+Our next challenge is to try to find the return type of a function and replace it with another one. Let’s say we have an interface that declares some properties and meth- ods, and we need to wrap each of the methods into a Promise so they run asynchro- nously. For simplicity, we’ll consider a SyncService interface, which declares one property, baseUrl, and one method, getA():
+
+```ts
+ interface SyncService {
+            baseUrl: string;
+            getA(): string;
+}
+```
+
+There’s nothing to do with the baseUrl property as it is, but we want to promisify the getA() method. Here are the challenges:
+
+* How can we differentiate properties from methods?
+* How can we reach out to the original return type of the method before wrapping it into a Promise?
+* How can we preserve the existing argument types of the methods?
+
+Since we need to differentiate properties from methods, we’ll use conditional types; mapped types will help us with modifying method signatures. Our goal is to create a Promisify type and apply it to SyncService. This way the implementation of getA() will have to return a Promise. We want to be able to write code as in the following listing.
+
+promisifying synchronous methods
+
+```ts
+
+class AsyncService implement Promisify<SyncService> {
+  // no need to modify properties from SyncService
+  baseUrl: string;
+
+  // the original return type must be wrapped in Promise.
+  getA(): Promise<string> {
+        return Promise.resolve('');
+  }   
+}
+```
+
+We want to declare a new Promisify mapped type that will loop through all proper- ties of a given type T and convert the signatures of its methods so they become asyn- chronous. The conversion will be done by a conditional type, with the condition being that the type U (the supertype of T) has to be a function that can take any number of arguments of any types and may return any value:
+
+```ts
+T extends (...args: any[]) => any ?
+```
+
+After the question mark, you provide the type to use if T is a function; you provide another type after the colon if T isn’t a function (not shown).
+
+The type T must be assignable to a type that looks like a function signature. If the provided type is a function, we want to wrap the return of this function into a Promise. The problem is that if we use the type any, we’ll lose the type information for function arguments as well as the return type.
+
+Let’s assume that a generic type R represents the return type of the function. Then we can use the infer keyword with this variable R:
+
+```ts
+T extends (...args: any[]) => infer R ?
+```
+
+By writing infer R, we instruct TypeScript to check the provided concrete return type (for example, string for the getA() method) and replace infer R with this concrete type. Similarly, we can replace the any[] type in the function arguments with infer A:
+
+```ts
+T extends (...args: infer A) => infer R ?
+```
+
+Now we can declare our conditional type as follows:
+
+```ts
+type ReturnPromise<T> = T extends (...args: infer A) => infer R ? (...args: A) => Promise<R>: T;
+```
+
+This instructs TypeScript: “If a concrete type for T is a function, wrap its return type: Promise<R>. Otherwise, just preserve its type T.” The conditional ReturnPromise<T> type can be applied to any type, and if we want to enumerate all the properties of a class, interface, and so on, we can use the keyof lookup type to get ahold of all the properties.
+If you read section 5.2 on mapped types, the syntax of the next snippet should be familiar to you:
+
+```ts
+type Promisify<T> = {
+    [P in keyof T]: ReturnPromise<T[P]>;
+};
+```
+
+The Promisify<T> mapped type will iterate through the properties of T and apply to them the conditional ReturnPromise type. In our example, we’ll do Promisify <SyncService>, which won’t do anything to the baseUrl property, but will change the return type of getA() to Promise<string>.
+
+5-6.ts
+
+### Summary
+
+* Using TypeScript decorators, you can add metadata to a class, function, prop- erty, or parameter.
+* Decorators allow you to modify the type declaration or a behavior of a class, method, property, or parameter. Even if you don’t write your own decorators, you need to understand their use if one of the frameworks uses them.
+* You can create a type based on another one.
+* Mapped types allow you to create apps that have a limited number of basic types and many derived types based on the basic ones.
+* Conditional types allow you to postpone making a decision about what type to use; the decision is made at runtime based on some condition.
+* These language features are not simple to understand, but they show the power of the language. When we discuss the code of the blockchain app in chapter 10,
+you’ll see the practical use of mapped and conditional types.
+
+
+## 6 - tooling
+
+* Debugging TypeScript code with the help of source maps
+* The role of linters
+* Compiling and bundling TypeScript apps with Webpack
+* Compiling TypeScript apps with Babel
+* How to compile TypeScript with Babel and bundle it with Webpack
+
+TypeScript developers appreciate autocompletion, those squiggly lines indicating errors as you type, and the refactor- ing offered by IDEs.
+
+And the best part is that most of these features are implemented by the Type- Script team and not by IDE developers. You’ll see the same autocomplete and error messages in the online TypeScript Playground, in Visual Studio Code, or in Web- Storm. When you install TypeScript, its bin directory includes two files: tsc and tsserver. The latter is the TypeScript Language Service that IDEs use to support these productivity features. . When you type your TypeScript code, the IDEs communi- cate with tsserver, which compiles the code in memory.
+
+With the help of source map files, you can debug your TypeScript code right in the browser. There are tools called linters; they allow you to enforce the coding styles in your organization.
+
+Type declaration files (.d.ts files) allow tsserver to offer context-sensitive help show- ing the signatures of available functions or of object properties. Thousands of type declaration files for popular JavaScript libraries are available publicly, and they allow you to be more productive even with code that’s not written in TypeScript.
+
+All these conveniences add up and explain why people like TypeScript. But just having a great compiler is not enough for real-world projects, which consist of a diverse set of assets like JavaScript code, CSS, images, and so on. We’ll take a look at some essential tools for modern web development: Webpack bundler and Babel. We’ll also briefly review the emerging tools ncc and Deno.
+
+### Source maps
+
+Code written in TypeScript gets compiled into the JavaScript, which is executed in a browser or a standalone JavaScript engine. To debug a program, you need to provide its source code to the debugger, but we have two versions of the source code: the exe- cutable code is in JavaScript, and the original is in TypeScript. We’d like to debug the TypeScript code, and source map files allow us to do this.
+
+Source map files have .map extensions, and they contain JSON-formatted data that maps the corresponding code in the generated JavaScript to the original language, which in our case is TypeScript. If you decide to debug a running JavaScript program that was written in TypeScript, just have the browser download the source map files generated during compilation, and you’ll be able to place breakpoints in the Type- Script code even though the engine runs JavaScript.
+
+Let’s take a simple TypeScript program, shown in the following listing, and com- pile it with the --sourceMap generation option turned on. After that, we’ll peek inside the generated source map.
+
+6-1.ts
+
+Let’s compile this file, generating the source map file:
+
+```sh
+tsc 6-1.ts --sourceMap true
+```
+
+After the compilation is complete, you’ll see the files 6-1.js and 6-1.js.map.
+
+
+6-1.js.map , sourceamp file is not expected to be read by humans, but you can see that it has a file prop- erty with the name of the generated JavaScript file and a sources property with the name of the source TypeScript file. The mappings property contains mappings of code fragments in the JavaScript and TypeScript files.
+
+How does the JavaScript engine guess that the name of the file that contains the mapping is greeter.js.map? No guesses are needed. The Typescript compiler simply adds the following line at the end of the generated 6-1.js file:
+
+//# sourceMappingURL=6-1.js.map
+
+Now let’s run our little greeter app in the browser and see if we can debug its Type- Script code. First, let’s create an HTML file that loads 6-1.js:
+
+Next we need a web server that will serve the preceding HTML document to the browser. You can download and install a convenient live-server npm package as follows:
+
+```sh
+npm install -g live-server
+```
+
+Finally, start this server in the Terminal window from the directory where the greeter files are located:
+
+```sh
+live-server
+```
+
+It’ll open the Chrome browser at localhost:8080 and will load the code from index.html (listing 6.3). You’ll see a blank page. Open the Chrome Dev Tools in the Sources tab and select the greeter.ts file. In the source code, click to the left of line 5 to place a breakpoint there. The Sources panel should look similar to the one in fig- ure 6.1.
+
+![](2022-02-20-17-38-55.png)
+
+![](2022-02-20-17-39-07.png)
+
+### The TSLint linter
+
+Linters are tools that check and enforce coding style. For example, you may want to ensure that all string values are specified in single quotes, or you may want to disallow unnecessary parentheses. Such restrictions are rules that you can configure in text files.
+
+JavaScript developers use several linters: JSLint, JSHint, and ESLint. TypeScript developers use the TSLint linter, which is an open source project maintained by Palantir (https://palantir.github.io/tslint). There is also a plan to merge TSLint and ESLint to ensure a unified linting experience—you can read more about this effort on the Palantir blog (“TSLint in 2019” at http://mng.bz/eD9V). Once this effort is com- plete, JavaScript and TypeScript developers will use ESLint (https://eslint.org). Because many TypeScript teams continue to use TSLint, we’ll provide a basic intro- duction to this tool here.
+
+To get started using TSLint, you first need to install it in your project. Let’s start from scratch. Create a new directory, open the Terminal window there, and initialize a new npm project with the following command:
+
+```sh
+npm init -y
+```
+
+The -y option will silently accept all the default options while creating the package .json file there.
+
+Then install TypeScript and ts-lint there as follows:
+
+```sh
+npm install typescript tslint
+```
+
+his will create a node_modules directory and install TypeScript and tslint in it. The tslint executable will be located in the node_modules/.bin directory.
+
+Now create a tslint.json configuration file using the following command:
+
+```sh
+./node_modules/.bin/tslint --init
+```
+
+![](2022-02-20-17-58-08.png)
+
+![](2022-02-20-18-07-15.png)
+
+### Bundling code with Webpack
+
+![](2022-02-20-18-26-40.png)
+
+![](2022-02-20-18-53-56.png)
+
+![](2022-02-20-19-07-25.png)
+
+![](2022-02-20-19-29-00.png)
+
+### Using the Babel compiler
+
+![](2022-02-20-19-53-39.png)
+
+![](2022-02-20-19-53-48.png)
+
+### Using Babel with JavaScript
+
+![](2022-02-20-20-39-46.png)
+
+![](2022-02-20-20-40-02.png)
+
+![](2022-02-20-20-40-19.png)
+
+![](2022-02-20-20-40-54.png)
+
+![](2022-02-20-20-41-10.png)
+
+### Summary
+
+* Source maps allow you to debug your TypeScript code even though the browser runs the JavaScript version.
+* Linters are used to check and enforce coding styles. We introduced TSLint too, but it’s going to be merged with ESLint soon.
+* To deploy a web app, we usually bundle up the source files to decrease the num- ber of files the browser needs to download. Webpack is one of the most popular bundlers.
+* JavaScript developers use Babel to compile code that uses a newer ECMAScript syntax into code that’s supported by specific versions of web browsers. In some cases it make sense to use both TypeScript and Babel compilers.
+* Knowing the syntax of any programming language is important, but under- standing the process of how your program could be turned into a working run- nable app is equally important.
